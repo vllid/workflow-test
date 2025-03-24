@@ -21,8 +21,12 @@ public class UserAnalyticsController {
                 ctx.status(400).result("Missing parameters");
                 return;
             }
-            boolean success = service.registerUser(userId, userName);
-            ctx.result("User registered: " + success);
+            try {
+                boolean success = service.registerUser(userId, userName);
+                ctx.result("User registered: " + success);
+            } catch (IllegalArgumentException e) {
+                ctx.status(400).result(e.getMessage());
+            }
         });
 
         app.post("/recordSession", ctx -> {
