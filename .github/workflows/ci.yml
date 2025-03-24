@@ -6,26 +6,26 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-20.04
     steps:
       - run: echo "Build Job is triggered by ${{ github.event_name }} event."
       - name: Checkout repository code
         uses: actions/checkout@v4
-      - run: echo "The ${{ github.repository }} repository has been cloned to the runner"
-      - name: List files in the repository
-        run: |
-          ls -R
       - name: Grant permissions to gradle
         run: chmod +x gradlew
-      - name: Build project
-        run: ./gradlew build
+      - name: Build and test project
+        run: ./gradlew test
+      - name: Generate Jacoco report
+        run: ./gradlew jacocoTestReport
+      - name: Generate Allure report
+        run: ./gradlew allureReport
+      - name: Store reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
       - run: echo "The workflow is ready to test repository's code"
       - run: echo "This job's status is ${{ job.status }}"
-  test:
-    runs-on: ubuntu-20.04
-    needs: build
-    steps:
-      - run: echo "Running test job"
-      - name: Test project
-        run: ./gradlew test
