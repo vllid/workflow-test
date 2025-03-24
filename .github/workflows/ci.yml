@@ -30,7 +30,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: main
+          publish_branch: gh-pages
           publish_dir: |
             **/build/reports/allure-report/allureReport
       - run: echo "This job's status is ${{ job.status }}"
