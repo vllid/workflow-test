@@ -38,7 +38,6 @@ test {
 
 spotless {
     java {
-        target 'src/**/*.java'
         googleJavaFormat().skipJavadocFormatting()
     }
 }
