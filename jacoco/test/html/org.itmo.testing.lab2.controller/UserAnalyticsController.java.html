@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserAnalyticsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">software_testing_lab2</a> &gt; <a href="index.source.html" class="el_package">org.itmo.testing.lab2.controller</a> &gt; <span class="el_source">UserAnalyticsController.java</span></div><h1>UserAnalyticsController.java</h1><pre class="source lang-java linenums">package org.itmo.testing.lab2.controller;
+
+import io.javalin.Javalin;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Map;
+import org.itmo.testing.lab2.service.UserAnalyticsService;
+
+<span class="nc" id="L10">public class UserAnalyticsController {</span>
+
+  public static Javalin createApp() {
+<span class="fc" id="L13">    UserAnalyticsService service = new UserAnalyticsService();</span>
+<span class="fc" id="L14">    Javalin app = Javalin.create();</span>
+
+<span class="fc" id="L16">    app.post(</span>
+        &quot;/register&quot;,
+        ctx -&gt; {
+<span class="fc" id="L19">          String userId = ctx.queryParam(&quot;userId&quot;);</span>
+<span class="fc" id="L20">          String userName = ctx.queryParam(&quot;userName&quot;);</span>
+<span class="fc bfc" id="L21" title="All 4 branches covered.">          if (userId == null || userName == null) {</span>
+<span class="fc" id="L22">            ctx.status(400).result(&quot;Missing parameters&quot;);</span>
+<span class="fc" id="L23">            return;</span>
+          }
+          try {
+<span class="fc" id="L26">            boolean success = service.registerUser(userId, userName);</span>
+<span class="fc" id="L27">            ctx.result(&quot;User registered: &quot; + success);</span>
+<span class="fc" id="L28">          } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L29">            ctx.status(400).result(e.getMessage());</span>
+<span class="fc" id="L30">          }</span>
+<span class="fc" id="L31">        });</span>
+
+<span class="fc" id="L33">    app.post(</span>
+        &quot;/recordSession&quot;,
+        ctx -&gt; {
+<span class="fc" id="L36">          String userId = ctx.queryParam(&quot;userId&quot;);</span>
+<span class="fc" id="L37">          String loginTime = ctx.queryParam(&quot;loginTime&quot;);</span>
+<span class="fc" id="L38">          String logoutTime = ctx.queryParam(&quot;logoutTime&quot;);</span>
+<span class="fc bfc" id="L39" title="All 6 branches covered.">          if (userId == null || loginTime == null || logoutTime == null) {</span>
+<span class="fc" id="L40">            ctx.status(400).result(&quot;Missing parameters&quot;);</span>
+<span class="fc" id="L41">            return;</span>
+          }
+          try {
+<span class="fc" id="L44">            LocalDateTime login = LocalDateTime.parse(loginTime);</span>
+<span class="fc" id="L45">            LocalDateTime logout = LocalDateTime.parse(logoutTime);</span>
+<span class="fc" id="L46">            service.recordSession(userId, login, logout);</span>
+<span class="fc" id="L47">            ctx.result(&quot;Session recorded&quot;);</span>
+<span class="fc" id="L48">          } catch (Exception e) {</span>
+<span class="fc" id="L49">            ctx.status(400).result(&quot;Invalid data: &quot; + e.getMessage());</span>
+<span class="fc" id="L50">          }</span>
+<span class="fc" id="L51">        });</span>
+
+<span class="fc" id="L53">    app.get(</span>
+        &quot;/totalActivity&quot;,
+        ctx -&gt; {
+<span class="fc" id="L56">          String userId = ctx.queryParam(&quot;userId&quot;);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">          if (userId == null) {</span>
+<span class="fc" id="L58">            ctx.status(400).result(&quot;Missing userId&quot;);</span>
+<span class="fc" id="L59">            return;</span>
+          }
+<span class="fc" id="L61">          long minutes = service.getTotalActivityTime(userId);</span>
+<span class="fc" id="L62">          ctx.result(&quot;Total activity: &quot; + minutes + &quot; minutes&quot;);</span>
+<span class="fc" id="L63">        });</span>
+
+<span class="fc" id="L65">    app.get(</span>
+        &quot;/inactiveUsers&quot;,
+        ctx -&gt; {
+<span class="fc" id="L68">          String daysParam = ctx.queryParam(&quot;days&quot;);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">          if (daysParam == null) {</span>
+<span class="fc" id="L70">            ctx.status(400).result(&quot;Missing days parameter&quot;);</span>
+<span class="fc" id="L71">            return;</span>
+          }
+          try {
+<span class="fc" id="L74">            int days = Integer.parseInt(daysParam);</span>
+<span class="fc" id="L75">            List&lt;String&gt; inactiveUsers = service.findInactiveUsers(days);</span>
+<span class="fc" id="L76">            ctx.json(inactiveUsers);</span>
+<span class="fc" id="L77">          } catch (NumberFormatException e) {</span>
+<span class="fc" id="L78">            ctx.status(400).result(&quot;Invalid number format for days&quot;);</span>
+<span class="fc" id="L79">          }</span>
+<span class="fc" id="L80">        });</span>
+
+<span class="fc" id="L82">    app.get(</span>
+        &quot;/monthlyActivity&quot;,
+        ctx -&gt; {
+<span class="fc" id="L85">          String userId = ctx.queryParam(&quot;userId&quot;);</span>
+<span class="fc" id="L86">          String monthParam = ctx.queryParam(&quot;month&quot;);</span>
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">          if (userId == null || monthParam == null) {</span>
+<span class="nc" id="L88">            ctx.status(400).result(&quot;Missing parameters&quot;);</span>
+<span class="nc" id="L89">            return;</span>
+          }
+          try {
+<span class="fc" id="L92">            YearMonth month = YearMonth.parse(monthParam);</span>
+<span class="fc" id="L93">            Map&lt;String, Long&gt; activity = service.getMonthlyActivityMetric(userId, month);</span>
+<span class="fc" id="L94">            ctx.json(activity);</span>
+<span class="nc" id="L95">          } catch (Exception e) {</span>
+<span class="nc" id="L96">            ctx.status(400).result(&quot;Invalid data: &quot; + e.getMessage());</span>
+<span class="fc" id="L97">          }</span>
+<span class="fc" id="L98">        });</span>
+<span class="fc" id="L99">    return app;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
