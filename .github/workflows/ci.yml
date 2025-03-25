@@ -20,14 +20,18 @@ jobs:
         run: ./gradlew jacocoTestReport
       - name: Generate Allure report
         run: ./gradlew allureReport
+      - name: Run Spotless Check
+        run: ./gradlew spotlessCheck
       - name: Store reports
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: reports
           path: |
             **/build/reports/
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v4
+        if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
