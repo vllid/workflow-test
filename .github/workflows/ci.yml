@@ -36,5 +36,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: |
-            **/build/reports/allure-report/allureReport
+            **/build/reports
       - run: echo "This job's status is ${{ job.status }}"
